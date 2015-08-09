@@ -1,0 +1,9 @@
+@charset "UTF-8";
+@import "materialize/components/color";
+$primary-color: color("blue", "lighten-2") !default;
+@import 'materialize';
+
+.header{
+  color: rgb(117, 18, 163);
+  font-weight: bolder;
+}

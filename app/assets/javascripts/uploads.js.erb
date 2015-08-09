@@ -1,0 +1,67 @@
+window.onload = function() {
+  var sampleImage = document.getElementById("dog"),
+  canvas = convertImageToCanvas(sampleImage);
+
+  document.getElementById("canvasHolder").appendChild(canvas);
+
+  $(document).on('click', '#getImage', function(e){
+    e.preventDefault();
+
+    var xmlhttp = new XMLHttpRequest();    
+    var base64 = convertCanvasToImage(canvas);
+    var blob = dataURItoBlob(base64);
+    var form = document.getElementById('signed_s3');
+
+    var formData = new FormData(form);
+    formData.append('file', blob, 'clientside.png');
+
+    xmlhttp.open('POST', "<%= S3_BUCKET.url %>", true);    
+    xmlhttp.send(formData);
+    xmlhttp.addEventListener("load", uploadComplete, false);
+  });
+
+  function uploadComplete(evt) {
+    response = parseAmazonResponse(evt.currentTarget.response);
+    var img_url = "<%= S3_BUCKET.url %>" + response.key;
+    $('#output').html('<a href="' + img_url + '">' + img_url + '</a>');
+  }
+
+  function parseAmazonResponse(response) {
+    var result = {};
+    var pattern = /<(Bucket|Key)>([^<]+)<\/\1>/gi;
+    var matches = null;
+    while ( matches = pattern.exec( response ) ) {
+        var nodeName = matches[ 1 ].toLowerCase();
+        var nodeValue = matches[ 2 ];
+        result[ nodeName ] = nodeValue;
+    }
+    return( result );
+  }
+
+  function convertImageToCanvas(image) {
+    var canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    canvas.getContext("2d").drawImage(image, 0, 0);
+    return canvas;
+  }
+
+  function convertCanvasToImage(canvas) {
+    return canvas.toDataURL({format: 'png'});
+  }
+
+  function dataURItoBlob(dataURI) {
+    var byteString;
+    if (dataURI.split(',')[0].indexOf('base64') >= 0)
+        byteString = atob(dataURI.split(',')[1]);
+    else
+        byteString = unescape(dataURI.split(',')[1]);
+
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    var ia = new Uint8Array(byteString.length);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ia], {type:mimeString});
+  }
+};

@@ -1,0 +1,23 @@
+<div class="row">
+  <div class="col s12">
+    <h1 class="header">Upload to s3</h1>
+    <%= s3_uploader_form %>
+    <blockquote>
+      <p>
+        This is an example for client side image uploading using S3 presigned requests
+      </p>
+      <p>
+        Output: <span id="output"></span>
+      </p>
+    </blockquote>
+    <%= image_tag '/dog.jpg', id: "dog", style: "display:none;"%>
+  </div>
+  <div class="col s6">
+    <a class="waves-effect waves-light btn-large" id="getImage">
+      Upload this image
+    </a>
+  </div>
+  <div class="col s12">
+  	<p id="canvasHolder"></p>
+  </div>
+</div>
